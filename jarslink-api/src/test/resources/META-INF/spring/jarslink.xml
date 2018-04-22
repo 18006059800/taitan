@@ -18,4 +18,7 @@
         <property name="moduleLoader" ref="moduleLoader"></property>
         <property name="moduleManager" ref="moduleManager"></property>
     </bean>
+
+
+
 </beans>

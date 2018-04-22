@@ -47,7 +47,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.transformValues;
-import static com.alipay.jarslink.api.impl.ModuleUtil.destroyQuietly;
 
 /**
  * 定时刷新模块
@@ -174,7 +173,7 @@ public abstract class AbstractModuleRefreshScheduler implements InitializingBean
     private Collection<ModuleConfig> filterEnabledModule() {
         List<ModuleConfig> moduleConfigs = queryModuleConfigs();
         if (moduleConfigs == null || moduleConfigs.isEmpty()) {
-            return new ArrayList<>();
+            return new ArrayList<ModuleConfig>();
         }
         return Collections2.filter(moduleConfigs, new Predicate<ModuleConfig>() {
             @Override
@@ -242,6 +241,24 @@ public abstract class AbstractModuleRefreshScheduler implements InitializingBean
         for (String moduleName : modulesRedundant) {
             Module removed = moduleManager.remove(moduleName);
             destroyQuietly(removed);
+        }
+    }
+
+    /**
+     * 销毁模块，不抛出异常
+     *
+     * @param module
+     */
+    private static void destroyQuietly(Module module) {
+        if (module != null) {
+            try {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Destroy module: {}", module.getName());
+                }
+                module.destroy();
+            } catch (Exception e) {
+                LOGGER.error("Failed to destroy module " + module, e);
+            }
         }
     }
 

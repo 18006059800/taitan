@@ -19,9 +19,10 @@ package com.alipay.jarslink.api.impl;
 
 import com.alipay.jarslink.api.Action;
 import com.alipay.jarslink.api.Module;
-import com.alipay.jarslink.api.ModuleConfig;
 import com.alipay.jarslink.api.ModuleRuntimeException;
+import com.alipay.jarslink.api.ModuleConfig;
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.logging.LogFactory;
@@ -68,7 +69,7 @@ public class SpringModule implements Module {
 
     private final ConfigurableApplicationContext applicationContext;
 
-    public SpringModule(ModuleConfig moduleConfig, String version, String name,
+    public SpringModule(ModuleConfig moduleConfig,String version, String name,
                         ConfigurableApplicationContext applicationContext) {
         this.moduleConfig = moduleConfig;
         this.applicationContext = applicationContext;
@@ -113,7 +114,7 @@ public class SpringModule implements Module {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("JarsLink Scan actions finish: {}", ToStringBuilder.reflectionToString(actions));
         }
-        return actions;
+        return ImmutableMap.copyOf(actions);
     }
 
     @Override
@@ -179,9 +180,6 @@ public class SpringModule implements Module {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Close application context: {}", applicationContext);
         }
-        if (!actions.isEmpty()) {
-            actions.clear();
-        }
         //close spring context
         closeQuietly(applicationContext);
         //clean classloader
@@ -195,6 +193,7 @@ public class SpringModule implements Module {
      */
     public static void clear(ClassLoader classLoader) {
         checkNotNull(classLoader, "classLoader is null");
+        //Introspector缓存BeanInfo类来获得更好的性能。卸载时刷新所有Introspector的内部缓存。
         Introspector.flushCaches();
         //从已经使用给定类加载器加载的缓存中移除所有资源包
         ResourceBundle.clearCache(classLoader);

@@ -34,11 +34,4 @@ public interface ModuleLoader {
      */
     Module load(ModuleConfig moduleConfig);
 
-    /**
-     * 卸载一个模块
-     *
-     * @param module
-     */
-    void unload(Module module);
-
 }
